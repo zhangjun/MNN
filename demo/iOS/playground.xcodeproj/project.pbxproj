@@ -7,10 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		922CC9BE2206B7DC0085D404 /* synset_words.txt in Resources */ = {isa = PBXBuildFile; fileRef = 922CC9B92206B7DC0085D404 /* synset_words.txt */; };
 		922CC9BF2206B7DC0085D404 /* testcat.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 922CC9BA2206B7DC0085D404 /* testcat.jpg */; };
-		922CC9C02206B7DC0085D404 /* squeezenet.txt in Resources */ = {isa = PBXBuildFile; fileRef = 922CC9BC2206B7DC0085D404 /* squeezenet.txt */; };
-		922CC9C12206B7DC0085D404 /* squeezenet.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 922CC9BD2206B7DC0085D404 /* squeezenet.jpg */; };
 		929A7C1D221510C000C43722 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 929A7C1C221510C000C43722 /* AVFoundation.framework */; };
 		929A7C1F2215393900C43722 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 929A7C1E2215393900C43722 /* CoreMedia.framework */; };
 		AE2CFE2021FFE7390053943C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AE2CFE1F21FFE7390053943C /* AppDelegate.m */; };
@@ -19,8 +16,6 @@
 		AE2CFE2821FFE73B0053943C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AE2CFE2721FFE73B0053943C /* Assets.xcassets */; };
 		AE2CFE2B21FFE73B0053943C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AE2CFE2921FFE73B0053943C /* LaunchScreen.storyboard */; };
 		AE2CFE2E21FFE73B0053943C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AE2CFE2D21FFE73B0053943C /* main.m */; };
-		AEA46E6222365A8000F80F59 /* squeezenet_v1.1.caffe.mnn in Resources */ = {isa = PBXBuildFile; fileRef = AEA46E6122365A7F00F80F59 /* squeezenet_v1.1.caffe.mnn */; };
-		AEB7BD4722365B220030252F /* mobilenet_v2.caffe.mnn in Resources */ = {isa = PBXBuildFile; fileRef = AEB7BD4522365B220030252F /* mobilenet_v2.caffe.mnn */; };
 		AEB7BD4822365B220030252F /* mobilenet_v2_1.0_224.tflite.mnn in Resources */ = {isa = PBXBuildFile; fileRef = AEB7BD4622365B220030252F /* mobilenet_v2_1.0_224.tflite.mnn */; };
 		FE375821E28D10BE2F04DF9A /* libPods-playground.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 443959A142C9F5A9260064A1 /* libPods-playground.a */; };
 /* End PBXBuildFile section */
@@ -31,10 +26,7 @@
 		78072E65338A363D5816A269 /* Pods-simple.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-simple.release.xcconfig"; path = "Pods/Target Support Files/Pods-simple/Pods-simple.release.xcconfig"; sourceTree = "<group>"; };
 		823F14839C64B7FBF3FE2122 /* Pods-simple.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-simple.debug.xcconfig"; path = "Pods/Target Support Files/Pods-simple/Pods-simple.debug.xcconfig"; sourceTree = "<group>"; };
 		83E77ED818CBE7A7F809B82C /* Pods-playground.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-playground.debug.xcconfig"; path = "Pods/Target Support Files/Pods-playground/Pods-playground.debug.xcconfig"; sourceTree = "<group>"; };
-		922CC9B92206B7DC0085D404 /* synset_words.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = synset_words.txt; sourceTree = "<group>"; };
 		922CC9BA2206B7DC0085D404 /* testcat.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = testcat.jpg; sourceTree = "<group>"; };
-		922CC9BC2206B7DC0085D404 /* squeezenet.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = squeezenet.txt; sourceTree = "<group>"; };
-		922CC9BD2206B7DC0085D404 /* squeezenet.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = squeezenet.jpg; sourceTree = "<group>"; };
 		929A7C1C221510C000C43722 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		929A7C1E2215393900C43722 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		AE2CFE1B21FFE7390053943C /* playground.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = playground.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -47,8 +39,6 @@
 		AE2CFE2A21FFE73B0053943C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AE2CFE2C21FFE73B0053943C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AE2CFE2D21FFE73B0053943C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		AEA46E6122365A7F00F80F59 /* squeezenet_v1.1.caffe.mnn */ = {isa = PBXFileReference; lastKnownFileType = file; name = squeezenet_v1.1.caffe.mnn; path = ../../../resource/model/SqueezeNet/v1.1/squeezenet_v1.1.caffe.mnn; sourceTree = "<group>"; };
-		AEB7BD4522365B220030252F /* mobilenet_v2.caffe.mnn */ = {isa = PBXFileReference; lastKnownFileType = file; name = mobilenet_v2.caffe.mnn; path = ../../../resource/model/MobileNet/v2/mobilenet_v2.caffe.mnn; sourceTree = "<group>"; };
 		AEB7BD4622365B220030252F /* mobilenet_v2_1.0_224.tflite.mnn */ = {isa = PBXFileReference; lastKnownFileType = file; name = mobilenet_v2_1.0_224.tflite.mnn; path = ../../../resource/model/MobileNet/v2/mobilenet_v2_1.0_224.tflite.mnn; sourceTree = "<group>"; };
 		EA6810E9BE987AD4D96B7030 /* Pods-playground.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-playground.release.xcconfig"; path = "Pods/Target Support Files/Pods-playground/Pods-playground.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -82,7 +72,6 @@
 			isa = PBXGroup;
 			children = (
 				922CC9B82206B7DC0085D404 /* MobileNet */,
-				922CC9BB2206B7DC0085D404 /* SqueezeNet */,
 			);
 			name = model;
 			path = ../model;
@@ -92,21 +81,9 @@
 			isa = PBXGroup;
 			children = (
 				AEB7BD4622365B220030252F /* mobilenet_v2_1.0_224.tflite.mnn */,
-				AEB7BD4522365B220030252F /* mobilenet_v2.caffe.mnn */,
-				922CC9B92206B7DC0085D404 /* synset_words.txt */,
 				922CC9BA2206B7DC0085D404 /* testcat.jpg */,
 			);
 			path = MobileNet;
-			sourceTree = "<group>";
-		};
-		922CC9BB2206B7DC0085D404 /* SqueezeNet */ = {
-			isa = PBXGroup;
-			children = (
-				AEA46E6122365A7F00F80F59 /* squeezenet_v1.1.caffe.mnn */,
-				922CC9BD2206B7DC0085D404 /* squeezenet.jpg */,
-				922CC9BC2206B7DC0085D404 /* squeezenet.txt */,
-			);
-			path = SqueezeNet;
 			sourceTree = "<group>";
 		};
 		AE2CFE1221FFE7390053943C = {
@@ -215,15 +192,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				922CC9BF2206B7DC0085D404 /* testcat.jpg in Resources */,
-				AEB7BD4722365B220030252F /* mobilenet_v2.caffe.mnn in Resources */,
-				AEA46E6222365A8000F80F59 /* squeezenet_v1.1.caffe.mnn in Resources */,
-				922CC9C02206B7DC0085D404 /* squeezenet.txt in Resources */,
 				AE2CFE2B21FFE73B0053943C /* LaunchScreen.storyboard in Resources */,
 				AE2CFE2821FFE73B0053943C /* Assets.xcassets in Resources */,
 				AEB7BD4822365B220030252F /* mobilenet_v2_1.0_224.tflite.mnn in Resources */,
-				922CC9BE2206B7DC0085D404 /* synset_words.txt in Resources */,
 				AE2CFE2621FFE7390053943C /* Main.storyboard in Resources */,
-				922CC9C12206B7DC0085D404 /* squeezenet.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -422,14 +394,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = KV63CC7M9H;
 				INFOPLIST_FILE = playground/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.taobao.mnndemo;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zhangjun.metal-app";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -441,7 +413,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = KV63CC7M9H;
 				INFOPLIST_FILE = playground/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -449,7 +421,7 @@
 					"@executable_path/Frameworks",
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.taobao.mnndemo;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zhangjun.metal-app";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

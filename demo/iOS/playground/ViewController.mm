@@ -71,18 +71,15 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
 
     // result
     float *data = copy.host<float>();
-    LabeledElement objects[1000];
-    for (int i = 0; i < 1000; i++) {
-        objects[i].value = data[i];
-        objects[i].index = i;
-    }
-    qsort(objects, 1000, sizeof(objects[0]), (int (*)(const void *, const void *))CompareElements);
+//    LabeledElement objects[1000];
+//    for (int i = 0; i < 1000; i++) {
+//        objects[i].value = data[i];
+//        objects[i].index = i;
+//    }
+//    qsort(objects, 1000, sizeof(objects[0]), (int (*)(const void *, const void *))CompareElements);
 
     // to string
     NSString *string = @"";
-    for (int i = 0; i < 3; i++) {
-        string = [string stringByAppendingFormat:@"%@: %f\n", _labels[objects[i].index], objects[i].value];
-    }
     return [string stringByAppendingFormat:@"time elapse: %.3f ms", cost * 1000.f / cycles];
 }
 
@@ -96,19 +93,23 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
 @end
 
 #pragma mark -
-@interface MobileNetV2 : Model
+@interface ModelRun : Model
 @end
 
-@implementation MobileNetV2
+@implementation ModelRun
 - (instancetype)init {
     self = [super init];
     if (self) {
-        NSString *labels  = [[NSBundle mainBundle] pathForResource:@"synset_words" ofType:@"txt"];
-        NSString *lines   = [NSString stringWithContentsOfFile:labels encoding:NSUTF8StringEncoding error:nil];
-        self.labels       = [lines componentsSeparatedByString:@"\n"];
+        
+        NSString *libPath = [[NSBundle mainBundle] pathForResource:@"lib" ofType:nil];
+        NSString *metalLib = [libPath stringByAppendingPathComponent:@"lite.metallib"];
+        
+//        NSString *labels  = [[NSBundle mainBundle] pathForResource:@"mnn_model/synset_words" ofType:@"txt"];
+//        NSString *lines   = [NSString stringWithContentsOfFile:labels encoding:NSUTF8StringEncoding error:nil];
+//        self.labels       = [lines componentsSeparatedByString:@"\n"];
         self.defaultImage = [UIImage imageNamed:@"testcat.jpg"];
 
-        NSString *model = [[NSBundle mainBundle] pathForResource:@"mobilenet_v2.caffe" ofType:@"mnn"];
+        NSString *model = [[NSBundle mainBundle] pathForResource:@"mobilenet_v2_1.0_224.tflite" ofType:@"mnn"];
         _net            = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(model.UTF8String));
     }
     return self;
@@ -166,89 +167,88 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
 
 @end
 
-#pragma mark -
-@interface SqueezeNetV1_1 : Model
-@end
-
-@implementation SqueezeNetV1_1
-
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        NSString *labels  = [[NSBundle mainBundle] pathForResource:@"squeezenet" ofType:@"txt"];
-        NSString *lines   = [NSString stringWithContentsOfFile:labels encoding:NSUTF8StringEncoding error:nil];
-        self.labels       = [lines componentsSeparatedByString:@"\n"];
-        self.defaultImage = [UIImage imageNamed:@"squeezenet.jpg"];
-
-        NSString *model = [[NSBundle mainBundle] pathForResource:@"squeezenet_v1.1.caffe" ofType:@"mnn"];
-        _net            = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(model.UTF8String));
-    }
-    return self;
-}
-
-- (NSString *)inferImage:(UIImage *)image cycles:(NSInteger)cycles {
-    int w               = image.size.width;
-    int h               = image.size.height;
-    unsigned char *rgba = (unsigned char *)calloc(w * h * 4, sizeof(unsigned char));
-    {
-        CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
-        CGContextRef contextRef    = CGBitmapContextCreate(rgba, w, h, 8, w * 4, colorSpace,
-                                                        kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);
-        CGContextDrawImage(contextRef, CGRectMake(0, 0, w, h), image.CGImage);
-        CGContextRelease(contextRef);
-    }
-
-    const float means[3] = {104.f, 117.f, 123.f};
-    MNN::CV::ImageProcess::Config process;
-    ::memcpy(process.mean, means, sizeof(means));
-    process.sourceFormat = MNN::CV::RGBA;
-    process.destFormat   = MNN::CV::BGR;
-
-    std::shared_ptr<MNN::CV::ImageProcess> pretreat(MNN::CV::ImageProcess::create(process));
-    MNN::CV::Matrix matrix;
-    matrix.postScale((w - 1) / 226.f, (h - 1) / 226.f);
-    pretreat->setMatrix(matrix);
-
-    auto input = _net->getSessionInput(_session, nullptr);
-    pretreat->convert(rgba, w, h, 0, input);
-    free(rgba);
-
-    return [super inferImage:image cycles:cycles];
-}
-
-- (NSString *)inferBuffer:(CMSampleBufferRef)sampleBuffer {
-    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-    int w                        = (int)CVPixelBufferGetWidth(pixelBuffer);
-    int h                        = (int)CVPixelBufferGetHeight(pixelBuffer);
-
-    CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
-    unsigned char *bgra = (unsigned char *)CVPixelBufferGetBaseAddress(pixelBuffer);
-
-    const float means[3] = {104.f, 117.f, 123.f};
-    MNN::CV::ImageProcess::Config process;
-    ::memcpy(process.mean, means, sizeof(means));
-    process.sourceFormat = MNN::CV::BGRA;
-    process.destFormat   = MNN::CV::BGR;
-
-    std::shared_ptr<MNN::CV::ImageProcess> pretreat(MNN::CV::ImageProcess::create(process));
-    MNN::CV::Matrix matrix;
-    matrix.postScale((w - 1) / 226.f, (h - 1) / 226.f);
-    pretreat->setMatrix(matrix);
-
-    auto input = _net->getSessionInput(_session, nullptr);
-    pretreat->convert(bgra, w, h, 0, input);
-
-    CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
-    return [super inferBuffer:sampleBuffer];
-}
-@end
+//#pragma mark -
+//@interface SqueezeNetV1_1 : Model
+//@end
+//
+//@implementation SqueezeNetV1_1
+//
+//- (instancetype)init {
+//    self = [super init];
+//    if (self) {
+//        NSString *labels  = [[NSBundle mainBundle] pathForResource:@"squeezenet" ofType:@"txt"];
+//        NSString *lines   = [NSString stringWithContentsOfFile:labels encoding:NSUTF8StringEncoding error:nil];
+//        self.labels       = [lines componentsSeparatedByString:@"\n"];
+//        self.defaultImage = [UIImage imageNamed:@"squeezenet.jpg"];
+//
+//        NSString *model = [[NSBundle mainBundle] pathForResource:@"squeezenet_v1.1.caffe" ofType:@"mnn"];
+//        _net            = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(model.UTF8String));
+//    }
+//    return self;
+//}
+//
+//- (NSString *)inferImage:(UIImage *)image cycles:(NSInteger)cycles {
+//    int w               = image.size.width;
+//    int h               = image.size.height;
+//    unsigned char *rgba = (unsigned char *)calloc(w * h * 4, sizeof(unsigned char));
+//    {
+//        CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
+//        CGContextRef contextRef    = CGBitmapContextCreate(rgba, w, h, 8, w * 4, colorSpace,
+//                                                        kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);
+//        CGContextDrawImage(contextRef, CGRectMake(0, 0, w, h), image.CGImage);
+//        CGContextRelease(contextRef);
+//    }
+//
+//    const float means[3] = {104.f, 117.f, 123.f};
+//    MNN::CV::ImageProcess::Config process;
+//    ::memcpy(process.mean, means, sizeof(means));
+//    process.sourceFormat = MNN::CV::RGBA;
+//    process.destFormat   = MNN::CV::BGR;
+//
+//    std::shared_ptr<MNN::CV::ImageProcess> pretreat(MNN::CV::ImageProcess::create(process));
+//    MNN::CV::Matrix matrix;
+//    matrix.postScale((w - 1) / 226.f, (h - 1) / 226.f);
+//    pretreat->setMatrix(matrix);
+//
+//    auto input = _net->getSessionInput(_session, nullptr);
+//    pretreat->convert(rgba, w, h, 0, input);
+//    free(rgba);
+//
+//    return [super inferImage:image cycles:cycles];
+//}
+//
+//- (NSString *)inferBuffer:(CMSampleBufferRef)sampleBuffer {
+//    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+//    int w                        = (int)CVPixelBufferGetWidth(pixelBuffer);
+//    int h                        = (int)CVPixelBufferGetHeight(pixelBuffer);
+//
+//    CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+//    unsigned char *bgra = (unsigned char *)CVPixelBufferGetBaseAddress(pixelBuffer);
+//
+//    const float means[3] = {104.f, 117.f, 123.f};
+//    MNN::CV::ImageProcess::Config process;
+//    ::memcpy(process.mean, means, sizeof(means));
+//    process.sourceFormat = MNN::CV::BGRA;
+//    process.destFormat   = MNN::CV::BGR;
+//
+//    std::shared_ptr<MNN::CV::ImageProcess> pretreat(MNN::CV::ImageProcess::create(process));
+//    MNN::CV::Matrix matrix;
+//    matrix.postScale((w - 1) / 226.f, (h - 1) / 226.f);
+//    pretreat->setMatrix(matrix);
+//
+//    auto input = _net->getSessionInput(_session, nullptr);
+//    pretreat->convert(bgra, w, h, 0, input);
+//
+//    CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+//    return [super inferBuffer:sampleBuffer];
+//}
+//@end
 
 @interface ViewController ()<AVCaptureVideoDataOutputSampleBufferDelegate>
 @property (assign, nonatomic) MNNForwardType forwardType;
 @property (assign, nonatomic) int threadCount;
 
-@property (strong, nonatomic) Model *mobileNetV2;
-@property (strong, nonatomic) Model *squeezeNetV1_1;
+@property (strong, nonatomic) Model *modelRun;
 @property (strong, nonatomic) Model *currentModel;
 
 @property (strong, nonatomic) AVCaptureSession *session;
@@ -270,9 +270,8 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
 
     self.forwardType    = MNN_FORWARD_CPU;
     self.threadCount    = 4;
-    self.mobileNetV2    = [MobileNetV2 new];
-    self.squeezeNetV1_1 = [SqueezeNetV1_1 new];
-    self.currentModel   = self.mobileNetV2;
+    self.modelRun    = [ModelRun new];
+    self.currentModel   = self.modelRun;
 
     AVCaptureSession *session        = [[AVCaptureSession alloc] init];
     session.sessionPreset            = AVCaptureSessionPreset1280x720;
@@ -333,28 +332,18 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
                                                                    message:nil
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"MobileNet V2"
+    [alert addAction:[UIAlertAction actionWithTitle:@"Model Run"
                                               style:UIAlertActionStyleDefault
                                             handler:^(UIAlertAction *action) {
                                                 __strong typeof(weakify) self = weakify;
                                                 self.modelItem.title          = action.title;
-                                                self.currentModel             = self.mobileNetV2;
+                                                self.currentModel             = self.modelRun;
                                                 if (!self.session.running) {
                                                     self.imageView.image = self.currentModel.defaultImage;
                                                 }
                                                 [self refresh];
                                             }]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"SqueezeNet V1.1"
-                                              style:UIAlertActionStyleDefault
-                                            handler:^(UIAlertAction *action) {
-                                                __strong typeof(weakify) self = weakify;
-                                                self.modelItem.title          = action.title;
-                                                self.currentModel             = self.squeezeNetV1_1;
-                                                if (!self.session.running) {
-                                                    self.imageView.image = self.currentModel.defaultImage;
-                                                }
-                                                [self refresh];
-                                            }]];
+    
     [self presentViewController:alert animated:YES completion:nil];
 }
 
