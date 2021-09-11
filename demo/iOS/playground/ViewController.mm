@@ -58,6 +58,16 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
     auto input = _net->getSessionInput(_session, nullptr);
     MNN::Tensor tensorCache(input);
     input->copyToHostTensor(&tensorCache);
+    
+    // warmup
+    NSTimeInterval warm_begin = NSDate.timeIntervalSinceReferenceDate;
+    // you should set input data for each inference
+    for (int i = 0; i < 1; i++) {
+        input->copyFromHostTensor(&tensorCache);
+        _net->runSession(_session);
+        output->copyToHostTensor(&copy);
+    }
+    NSTimeInterval warm_cost = NSDate.timeIntervalSinceReferenceDate - warm_begin;
 
     // run
     NSTimeInterval begin = NSDate.timeIntervalSinceReferenceDate;
@@ -80,7 +90,7 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
 
     // to string
     NSString *string = @"";
-    return [string stringByAppendingFormat:@"time elapse: %.3f ms", cost * 1000.f / cycles];
+    return [string stringByAppendingFormat:@"warmup: %.3f ms, time elapse: %.3f ms", warm_cost * 1000.f, cost * 1000.f / cycles];
 }
 
 - (NSString *)inferImage:(UIImage *)image cycles:(NSInteger)cycles {
@@ -102,14 +112,24 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
     if (self) {
         
         NSString *libPath = [[NSBundle mainBundle] pathForResource:@"lib" ofType:nil];
+        NSString *modelZone = [[NSBundle mainBundle] pathForResource:@"models"
+                                                              ofType:nil];
         NSString *metalLib = [libPath stringByAppendingPathComponent:@"lite.metallib"];
         
-//        NSString *labels  = [[NSBundle mainBundle] pathForResource:@"mnn_model/synset_words" ofType:@"txt"];
-//        NSString *lines   = [NSString stringWithContentsOfFile:labels encoding:NSUTF8StringEncoding error:nil];
-//        self.labels       = [lines componentsSeparatedByString:@"\n"];
+        NSPredicate *modelFormat = [NSPredicate predicateWithFormat:@"self ENDSWITH 'mnn'"];
         self.defaultImage = [UIImage imageNamed:@"testcat.jpg"];
-
-        NSString *model = [[NSBundle mainBundle] pathForResource:@"mobilenet_v2_1.0_224.tflite" ofType:@"mnn"];
+        NSLog(@"model_zone: %@", modelZone);
+        // find mnn model
+        NSArray *dirFiles = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:modelZone error:nil];
+        
+        // find nnn model
+        NSArray<NSString *> *mnnFiles = [dirFiles filteredArrayUsingPredicate:modelFormat];
+        NSString *model = [[NSBundle mainBundle] pathForResource:@"models/mobilenet_v2_1.0_224.tflite" ofType:@"mnn"];
+        if(mnnFiles.count > 0) {
+            model = [modelZone stringByAppendingPathComponent:mnnFiles[0]];
+            NSLog(@"model_file: %@", model);
+        }
+        
         _net            = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(model.UTF8String));
     }
     return self;
@@ -167,82 +187,6 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
 
 @end
 
-//#pragma mark -
-//@interface SqueezeNetV1_1 : Model
-//@end
-//
-//@implementation SqueezeNetV1_1
-//
-//- (instancetype)init {
-//    self = [super init];
-//    if (self) {
-//        NSString *labels  = [[NSBundle mainBundle] pathForResource:@"squeezenet" ofType:@"txt"];
-//        NSString *lines   = [NSString stringWithContentsOfFile:labels encoding:NSUTF8StringEncoding error:nil];
-//        self.labels       = [lines componentsSeparatedByString:@"\n"];
-//        self.defaultImage = [UIImage imageNamed:@"squeezenet.jpg"];
-//
-//        NSString *model = [[NSBundle mainBundle] pathForResource:@"squeezenet_v1.1.caffe" ofType:@"mnn"];
-//        _net            = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(model.UTF8String));
-//    }
-//    return self;
-//}
-//
-//- (NSString *)inferImage:(UIImage *)image cycles:(NSInteger)cycles {
-//    int w               = image.size.width;
-//    int h               = image.size.height;
-//    unsigned char *rgba = (unsigned char *)calloc(w * h * 4, sizeof(unsigned char));
-//    {
-//        CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
-//        CGContextRef contextRef    = CGBitmapContextCreate(rgba, w, h, 8, w * 4, colorSpace,
-//                                                        kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);
-//        CGContextDrawImage(contextRef, CGRectMake(0, 0, w, h), image.CGImage);
-//        CGContextRelease(contextRef);
-//    }
-//
-//    const float means[3] = {104.f, 117.f, 123.f};
-//    MNN::CV::ImageProcess::Config process;
-//    ::memcpy(process.mean, means, sizeof(means));
-//    process.sourceFormat = MNN::CV::RGBA;
-//    process.destFormat   = MNN::CV::BGR;
-//
-//    std::shared_ptr<MNN::CV::ImageProcess> pretreat(MNN::CV::ImageProcess::create(process));
-//    MNN::CV::Matrix matrix;
-//    matrix.postScale((w - 1) / 226.f, (h - 1) / 226.f);
-//    pretreat->setMatrix(matrix);
-//
-//    auto input = _net->getSessionInput(_session, nullptr);
-//    pretreat->convert(rgba, w, h, 0, input);
-//    free(rgba);
-//
-//    return [super inferImage:image cycles:cycles];
-//}
-//
-//- (NSString *)inferBuffer:(CMSampleBufferRef)sampleBuffer {
-//    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-//    int w                        = (int)CVPixelBufferGetWidth(pixelBuffer);
-//    int h                        = (int)CVPixelBufferGetHeight(pixelBuffer);
-//
-//    CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
-//    unsigned char *bgra = (unsigned char *)CVPixelBufferGetBaseAddress(pixelBuffer);
-//
-//    const float means[3] = {104.f, 117.f, 123.f};
-//    MNN::CV::ImageProcess::Config process;
-//    ::memcpy(process.mean, means, sizeof(means));
-//    process.sourceFormat = MNN::CV::BGRA;
-//    process.destFormat   = MNN::CV::BGR;
-//
-//    std::shared_ptr<MNN::CV::ImageProcess> pretreat(MNN::CV::ImageProcess::create(process));
-//    MNN::CV::Matrix matrix;
-//    matrix.postScale((w - 1) / 226.f, (h - 1) / 226.f);
-//    pretreat->setMatrix(matrix);
-//
-//    auto input = _net->getSessionInput(_session, nullptr);
-//    pretreat->convert(bgra, w, h, 0, input);
-//
-//    CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
-//    return [super inferBuffer:sampleBuffer];
-//}
-//@end
 
 @interface ViewController ()<AVCaptureVideoDataOutputSampleBufferDelegate>
 @property (assign, nonatomic) MNNForwardType forwardType;
@@ -410,6 +354,7 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             NSString *str = [self->_currentModel inferImage:image cycles:100];
             dispatch_async(dispatch_get_main_queue(), ^{
+                NSLog(@"run benchmark: %@", str);
                 self.resultLabel.text      = str;
                 self.cameraItem.enabled    = YES;
                 self.runItem.enabled       = YES;
