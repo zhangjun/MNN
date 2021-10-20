@@ -213,7 +213,7 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
     [super awakeFromNib];
 
     self.forwardType    = MNN_FORWARD_CPU;
-    self.threadCount    = 4;
+    self.threadCount    = 1;
     self.modelRun    = [ModelRun new];
     self.currentModel   = self.modelRun;
 
@@ -243,7 +243,7 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
 
 - (void)refresh {
     [_currentModel setType:_forwardType threads:_threadCount];
-    [self run];
+    // [self run];
 }
 
 - (IBAction)toggleInput {
@@ -352,7 +352,7 @@ static int CompareElements(const LabeledElement *a, const LabeledElement *b) {
         self.threadItem.enabled    = NO;
         UIImage *image             = self->_imageView.image;
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSString *str = [self->_currentModel inferImage:image cycles:100];
+            NSString *str = [self->_currentModel inferImage:image cycles:20];
             dispatch_async(dispatch_get_main_queue(), ^{
                 NSLog(@"run benchmark: %@", str);
                 self.resultLabel.text      = str;
